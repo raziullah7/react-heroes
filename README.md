@@ -53,4 +53,7 @@ export default tseslint.config({
 })
 
 // that's all there is
+
+// For pull shark badge from Taha Ahmad.
+
 ```
