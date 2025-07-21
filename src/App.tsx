@@ -1,12 +1,24 @@
-import { useState, type ChangeEvent } from 'react'
+import {useState, type ChangeEvent, useEffect, useRef} from 'react'
 import './App.css'
 import type { Hero } from './types/hero'
-import { HEROES } from './data/mock-heroes'
 import HeroDetail from './components/HeroDetail';
 
 function App() {
-  const [heroes, setHeroes] = useState<Hero[]>(HEROES);
+  const [heroes, setHeroes] = useState<Hero[]>([]);
   const [selectedHeroId, setSelectedHeroId] = useState<number | null>(null);
+  // introducing useRef to stop it from fetching twice due to strict mode
+  const fetched = useRef(false)
+
+  useEffect(() => {
+    // if not fetched, then fetch
+    if (!fetched.current) {
+      fetch('http://localhost:3000/heroes')
+          .then(res => res.json())
+          .then(data => setHeroes(data))
+
+      fetched.current = true;
+    }
+  }, [heroes])
 
   const selectedHero = heroes.find(hero => hero.id === selectedHeroId)
 
