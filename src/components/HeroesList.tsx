@@ -1,6 +1,7 @@
 import {useEffect, useRef, useState} from "react";
 import type {Hero} from "../types/hero.ts";
 import {Link} from "react-router-dom";
+import {useMessages} from "../context/MessageContext.tsx";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -8,17 +9,21 @@ export default function HeroesList() {
     const [heroes, setHeroes] = useState<Hero[]>([]);
     // introducing useRef to stop it from fetching twice due to strict mode
     const fetched = useRef(false)
+    const {addMessage} = useMessages()
 
     useEffect(() => {
         // if not fetched, then fetch
         if (!fetched.current) {
             fetch(`${apiUrl}/heroes`)
                 .then(res => res.json())
-                .then(data => setHeroes(data))
+                .then(data => {
+                    setHeroes(data)
+                    addMessage("All heroes loaded")
+                })
 
             fetched.current = true;
         }
-    }, [heroes])
+    }, [addMessage, heroes])
 
     return (
         <>

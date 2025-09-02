@@ -1,22 +1,27 @@
 import {type ChangeEvent, useEffect, useRef, useState} from "react";
 import type {Hero} from "../types/hero.ts";
 import {useParams} from "react-router-dom";
+import {useMessages} from "../context/MessageContext.tsx";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
 export default function HeroDetail() {
     const [hero, setHero] = useState<Hero | null>(null)
-    const params = useParams()
+    const {id: heroId} = useParams()
     const fetched = useRef(false)
+    const {addMessage} = useMessages()
 
     useEffect(() => {
         if (!fetched.current) {
-            fetch(`${apiUrl}/heroes/${params.id}`)
+            fetch(`${apiUrl}/heroes/${heroId}`)
                 .then(data => data.json())
-                .then(data => setHero(data));
+                .then(data => {
+                    setHero(data)
+                    addMessage(`Hero ${data.name} loaded`)
+                });
         }
         fetched.current = true;
-    }, [params.id]);
+    }, [addMessage, heroId]);
 
     if (!hero) return null
     const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {

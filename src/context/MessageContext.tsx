@@ -1,4 +1,4 @@
-import {createContext, type ReactNode, useContext, useState} from "react";
+import {createContext, type ReactNode, useCallback, useContext, useState} from "react";
 
 type MessageContextType = {
     messages: string[],
@@ -13,9 +13,9 @@ const MessageProvider = ({children}: { children: ReactNode }) => {
 
     const clearMessages = () => setMessages([])
 
-    const addMessage = (message: string) => {
+    const addMessage = useCallback((message: string) => {
         setMessages(prevMessages => [...prevMessages, message])
-    }
+    }, [])
 
     return (
         <MessageContext.Provider value={{messages, addMessage, clearMessages}}>

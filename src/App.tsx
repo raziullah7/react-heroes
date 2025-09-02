@@ -1,5 +1,6 @@
 import './App.css'
 import {NavLink, Outlet} from "react-router-dom";
+import Messages from "./components/Messages.tsx";
 
 export default function App() {
     return (
@@ -8,7 +9,7 @@ export default function App() {
                 React Heroes
             </h1>
             <nav className="bg-slate-200 p-1 mt-2">
-                <ul className="flex justify-center gap-4 my-3 text-2xl font-semibold uppercase">
+                <ul className="flex justify-center gap-6 my-3 text-2xl font-semibold uppercase">
                     <li><NavLink to='/dashboard'>Dashboard</NavLink></li>
                     <li><NavLink to='/heroes'>Heroes</NavLink></li>
                 </ul>
@@ -20,7 +21,7 @@ export default function App() {
                     <Outlet/>
                 </div>
                 <div className="flex-1">
-                    Messages go here (coming soon . . .)
+                    <Messages/>
                 </div>
             </div>
         </>
