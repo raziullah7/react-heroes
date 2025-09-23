@@ -1,21 +1,23 @@
-import {createContext, type ReactNode, useCallback, useContext, useState} from "react";
+import { ReactNode, createContext, useCallback, useContext, useState } from 'react';
 
 type MessageContextType = {
-    messages: string[],
-    clearMessages: () => void,
-    addMessage: (message: string) => void,
+    messages: string[];
+    addMessage: (message: string) => void;
+    clearMessages: () => void;
 }
 
-const MessageContext = createContext<MessageContextType | undefined>(undefined)
+const MessageContext = createContext<MessageContextType | undefined>(undefined);
 
-const MessageProvider = ({children}: { children: ReactNode }) => {
-    const [messages, setMessages] = useState<string[]>([])
+const MessageProvider = ({children}: {children: ReactNode}) => {
+    const [messages, setMessages] = useState<string[]>([]);
 
-    const clearMessages = () => setMessages([])
-
-    const addMessage = useCallback((message: string) => {
+    const addMessage = useCallback((message: string) =>  {
         setMessages(prevMessages => [...prevMessages, message])
     }, [])
+
+    const clearMessages = () => {
+        setMessages([]);
+    }
 
     return (
         <MessageContext.Provider value={{messages, addMessage, clearMessages}}>
@@ -24,13 +26,14 @@ const MessageProvider = ({children}: { children: ReactNode }) => {
     )
 }
 
-
 const useMessages = () => {
-    const context = useContext(MessageContext)
+    const context = useContext(MessageContext);
+
     if (context === undefined) {
-        throw new Error("useMessages must be used within the context")
+        throw new Error('useMessages must be used within a MessageProvider');
     }
-    return context
+
+    return context;
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
