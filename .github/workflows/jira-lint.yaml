@@ -14,14 +14,16 @@ jobs:
     runs-on: ubuntu-22.04
     if: github.actor != 'dependabot[bot]'
     env:
-      JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}           # <-- Replace with your Atlassian email
-      JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }} # <-- Add this secret in your repo
+      JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+      JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Validate PR Title for Jira Ticket
         run: |
+          set -euo pipefail
+
           PR_TITLE="${{ github.event.pull_request.title }}"
           ISSUE_KEY=$(echo "$PR_TITLE" | grep -oE '[A-Z]+-[0-9]+' | head -1)
 
@@ -30,8 +32,8 @@ jobs:
             exit 1
           fi
 
-          # Prepare Basic Auth
-          AUTH=$(echo -n "$JIRA_EMAIL:$JIRA_API_TOKEN" | base64)
+          # Prepare Basic Auth for Jira Cloud
+          AUTH=$(printf "%s:%s" "$JIRA_EMAIL" "$JIRA_API_TOKEN" | base64 | tr -d '\n')
 
           # Verify ticket exists
           HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
