@@ -25,7 +25,8 @@ jobs:
 
           [ -z "$ISSUE_KEY" ] && { echo "❌ PR title must contain a JIRA ticket code"; exit 1; }
 
-          AUTH=$(printf "%s:%s" "$JIRA_EMAIL:$JIRA_API_TOKEN" | base64 | tr -d '\n')
+          AUTH=$(printf "%s:%s" "$JIRA_EMAIL" "$JIRA_API_TOKEN" | base64 | tr -d '\n')
+
           HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
             -H "Authorization: Basic $AUTH" \
             -H "Accept: application/json" \
