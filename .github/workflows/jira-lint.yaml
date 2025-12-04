@@ -10,40 +10,27 @@ concurrency:
 
 jobs:
   jira-lint:
-    name: Jira Lint
     runs-on: ubuntu-22.04
     if: github.actor != 'dependabot[bot]'
     env:
       JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
       JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Validate PR Title for Jira Ticket
         run: |
-          set -euo pipefail
-
           PR_TITLE="${{ github.event.pull_request.title }}"
           ISSUE_KEY=$(echo "$PR_TITLE" | grep -oE '[A-Z]+-[0-9]+' | head -1)
 
-          if [ -z "$ISSUE_KEY" ]; then
-            echo "❌ PR title must contain a JIRA ticket code"
-            exit 1
-          fi
+          [ -z "$ISSUE_KEY" ] && { echo "❌ PR title must contain a JIRA ticket code"; exit 1; }
 
-          # Prepare Basic Auth for Jira Cloud
-          AUTH=$(printf "%s:%s" "$JIRA_EMAIL" "$JIRA_API_TOKEN" | base64 | tr -d '\n')
-
-          # Verify ticket exists
+          AUTH=$(printf "%s:%s" "$JIRA_EMAIL:$JIRA_API_TOKEN" | base64 | tr -d '\n')
           HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
             -H "Authorization: Basic $AUTH" \
             -H "Accept: application/json" \
             "https://raziullah913.atlassian.net/rest/api/3/issue/$ISSUE_KEY")
 
-          if [ "$HTTP_CODE" != "200" ]; then
-            echo "❌ JIRA ticket $ISSUE_KEY does not exist or is inaccessible (HTTP $HTTP_CODE)"
-            exit 1
-          fi
+          [ "$HTTP_CODE" != "200" ] && { echo "❌ JIRA ticket $ISSUE_KEY does not exist or is inaccessible (HTTP $HTTP_CODE)"; exit 1; }
 
           echo "✅ Valid JIRA ticket: $ISSUE_KEY"
