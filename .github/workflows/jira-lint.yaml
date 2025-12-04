@@ -1,0 +1,23 @@
+name: JIRA Lint
+
+on:
+  pull_request:
+    types: [opened, synchronize, edited]
+
+concurrency:
+  group: build-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  find_ticket_in_title:
+    name: Jira Lint
+    runs-on: ubuntu-22.04
+    if: github.actor != 'dependabot[bot]'
+    steps:
+      - name: Check JIRA Issue in PR Title
+        uses: cschleiden/jira-issue-action@v2
+        with:
+          jira-token: ${{ secrets.JIRA_API_TOKEN }}
+          jira-base-url: https://invisible.atlassian.net
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          fail-on-missing: true
