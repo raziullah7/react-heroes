@@ -26,14 +26,14 @@ jobs:
             exit 1
           fi
           
-          # # Verify ticket exists (using token as Bearer auth)
-          # HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
-          #   -H "Authorization: Bearer $JIRA_API_TOKEN" \
-          #   "https://invisible.atlassian.net/rest/api/3/issue/$ISSUE_KEY")
+          # Verify ticket exists (using token as Bearer auth)
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: Bearer $JIRA_API_TOKEN" \
+            "https://invisible.atlassian.net/rest/api/3/issue/$ISSUE_KEY")
           
-          # if [ "$HTTP_CODE" != "200" ]; then
-          #   echo "❌ JIRA ticket $ISSUE_KEY does not exist (HTTP $HTTP_CODE)"
-          #   exit 1
-          # fi
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "❌ JIRA ticket $ISSUE_KEY does not exist (HTTP $HTTP_CODE)"
+            exit 1
+          fi
           
           echo "✅ Valid JIRA ticket: $ISSUE_KEY"
