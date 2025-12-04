@@ -21,9 +21,9 @@ jobs:
       - name: Validate PR Title for Jira Ticket
         run: |
           PR_TITLE="${{ github.event.pull_request.title }}"
-          ISSUE_KEY=$(echo "$PR_TITLE" | grep -oE '^\[[A-Z]+-[0-9]+\]' | tr -d '[]')
+          ISSUE_KEY=$(echo "$PR_TITLE" | grep -oE '^\[[A-Z]+-[0-9]+\] ' | tr -d '[]')
 
-          [ -z "$ISSUE_KEY" ] && { echo "❌ PR title must contain a JIRA ticket code"; exit 1; }
+          [ -z "$ISSUE_KEY" ] && { echo "❌ PR title must contain a JIRA ticket code within square brackets"; exit 1; }
 
           AUTH=$(printf "%s:%s" "$JIRA_EMAIL:$JIRA_API_TOKEN" | base64 | tr -d '\n')
           HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
