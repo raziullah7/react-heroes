@@ -9,15 +9,28 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  find_ticket_in_title:
-    name: Jira Lint
+  jira-lint:
     runs-on: ubuntu-22.04
     if: github.actor != 'dependabot[bot]'
+    env:
+      JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }} # <-- use Jira Email directly or use a Github secret named JIRA_EMAIL
+      JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
     steps:
-      - name: Check JIRA Issue in PR Title
-        uses: cschleiden/jira-issue-action@v2
-        with:
-          jira-token: ${{ secrets.JIRA_API_TOKEN }}
-          jira-base-url: https://invisible.atlassian.net
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          fail-on-missing: true
+      - uses: actions/checkout@v4
+
+      - name: Validate PR Title for Jira Ticket
+        run: |
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          ISSUE_KEY=$(echo "$PR_TITLE" | grep -oE '^\[[A-Z]+-[0-9]+\] ' | tr -d '[] ')
+
+          [ -z "$ISSUE_KEY" ] && { echo "❌ PR title must contain a JIRA ticket code within square brackets"; exit 1; }
+
+          AUTH=$(printf "%s:%s" "$JIRA_EMAIL" "$JIRA_API_TOKEN" | base64 | tr -d '\n')
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: Basic $AUTH" \
+            -H "Accept: application/json" \
+            "https://raziullah913.atlassian.net/rest/api/3/issue/$ISSUE_KEY")
+
+          [ "$HTTP_CODE" != "200" ] && { echo "❌ JIRA ticket $ISSUE_KEY does not exist or is inaccessible (HTTP $HTTP_CODE)"; exit 1; }
+
+          echo "✅ Valid JIRA ticket: $ISSUE_KEY"
